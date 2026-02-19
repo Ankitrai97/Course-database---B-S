@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Layout, User, Sparkles, Rocket, ExternalLink } from "lucide-react";
+import { Plus, Layout, User, Sparkles, Rocket, ExternalLink, BookOpen, PlayCircle } from "lucide-react";
 import ModuleCard from '@/components/ModuleCard';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Course, Module, Lesson } from '@/types/course';
