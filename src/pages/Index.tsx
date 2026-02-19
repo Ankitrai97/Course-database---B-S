@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Layout, User, Sparkles, Rocket, ExternalLink, BookOpen, PlayCircle, Loader2, Save } from "lucide-react";
+import { Plus, Layout, User, Sparkles, Rocket, ExternalLink, BookOpen, PlayCircle, Loader2, Save, ShieldCheck } from "lucide-react";
 import ModuleCard from '@/components/ModuleCard';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Course, Module, Lesson } from '@/types/course';
@@ -11,6 +11,7 @@ import { showSuccess, showError } from '@/utils/toast';
 import { courseService } from '@/lib/courseService';
 import ProfileMenu from '@/components/ProfileMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
 
 const INITIAL_COURSE: Course = {
   id: 'main-course',
@@ -40,6 +41,16 @@ const Index = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { role, loading: isAuthLoading } = useAuth();
   const isAdmin = role === 'admin';
+  
+  // Controlled tab state
+  const [activeTab, setActiveTab] = useState<string>("viewer");
+
+  // Update active tab when admin status is confirmed
+  useEffect(() => {
+    if (!isAuthLoading) {
+      setActiveTab(isAdmin ? "editor" : "viewer");
+    }
+  }, [isAdmin, isAuthLoading]);
 
   // Load course from Supabase on mount
   useEffect(() => {
@@ -58,12 +69,10 @@ const Index = () => {
         }
       } catch (error: any) {
         console.error('Error loading course:', error);
-        // Fallback to localStorage if database fails
         const saved = localStorage.getItem('course_data');
         if (saved) {
           setCourse(JSON.parse(saved));
         }
-        // Show the actual error message to help debug
         showError(`Database Error: ${error.message || 'Unknown error'}`);
       } finally {
         setIsLoading(false);
@@ -73,7 +82,6 @@ const Index = () => {
     loadCourse();
   }, []);
 
-  // Save course to Supabase when Save button is clicked
   const handleSaveToDatabase = async () => {
     try {
       setIsSaving(true);
@@ -88,7 +96,6 @@ const Index = () => {
     }
   };
 
-  // Update course state only (no auto-save)
   const updateCourse = useCallback((updatedCourse: Course) => {
     setCourse(updatedCourse);
   }, []);
@@ -131,7 +138,14 @@ const Index = () => {
               <Sparkles size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">{course.title}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight">{course.title}</h1>
+                {isAdmin && (
+                  <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-none gap-1">
+                    <ShieldCheck size={12} /> Admin
+                  </Badge>
+                )}
+              </div>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Creator Portal</p>
             </div>
           </div>
@@ -169,7 +183,7 @@ const Index = () => {
             </div>
           </div>
         ) : (
-          <Tabs defaultValue={isAdmin ? "editor" : "viewer"} className="space-y-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 italic">DASHBOARD</h2>
