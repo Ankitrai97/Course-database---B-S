@@ -1,7 +1,6 @@
 import { supabase } from './supabase';
 import { Course } from '@/types/course';
 
-// Single table - stores entire course as JSON
 const COURSE_DATA_TABLE = 'course_data';
 
 export const courseService = {
@@ -11,15 +10,19 @@ export const courseService = {
         .from(COURSE_DATA_TABLE)
         .select('data')
         .eq('id', courseId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) {
+        console.error('Supabase error fetching course:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
       if (!data?.data) return null;
 
       return data.data as Course;
     } catch (error) {
-      console.error('Error fetching course:', error);
-      return null;
+      console.error('Error in getCourse:', error);
+      throw error;
     }
   },
 
@@ -36,7 +39,10 @@ export const courseService = {
           { onConflict: 'id' }
         );
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error saving course:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
       return true;
     } catch (error: unknown) {
       const message =
@@ -45,7 +51,7 @@ export const courseService = {
           : typeof error === 'object' && error !== null && 'message' in error
             ? String((error as { message: string }).message)
             : String(error);
-      console.error('Error saving course:', error);
+      console.error('Error in saveCourse:', error);
       throw new Error(message);
     }
   },
