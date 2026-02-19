@@ -50,23 +50,21 @@ const Index = () => {
         
         if (loadedCourse) {
           setCourse(loadedCourse);
-          // Also save to localStorage as backup
           localStorage.setItem('course_data', JSON.stringify(loadedCourse));
         } else {
           // No course found, create initial course in database
-          const saved = await courseService.saveCourse(INITIAL_COURSE);
-          if (saved) {
-            localStorage.setItem('course_data', JSON.stringify(INITIAL_COURSE));
-          }
+          await courseService.saveCourse(INITIAL_COURSE);
+          localStorage.setItem('course_data', JSON.stringify(INITIAL_COURSE));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading course:', error);
         // Fallback to localStorage if database fails
         const saved = localStorage.getItem('course_data');
         if (saved) {
           setCourse(JSON.parse(saved));
         }
-        showError('Failed to load course from database. Using local data.');
+        // Show the actual error message to help debug
+        showError(`Database Error: ${error.message || 'Unknown error'}`);
       } finally {
         setIsLoading(false);
       }
@@ -82,15 +80,9 @@ const Index = () => {
       await courseService.saveCourse(course);
       localStorage.setItem('course_data', JSON.stringify(course));
       showSuccess('Course saved to database!');
-    } catch (error: unknown) {
-      const msg =
-        error instanceof Error
-          ? error.message
-          : typeof error === 'object' && error !== null && 'message' in error
-            ? String((error as { message: string }).message)
-            : 'Failed to save course to database';
+    } catch (error: any) {
       console.error('Error saving course:', error);
-      showError(msg);
+      showError(`Save Failed: ${error.message || 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
