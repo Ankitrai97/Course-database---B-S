@@ -6,8 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import StudentDashboard from "./pages/StudentDashboard";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -21,8 +23,27 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Admin Dashboard */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <Index />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Student Dashboard */}
+            <Route 
+              path="/student-dashboard" 
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
