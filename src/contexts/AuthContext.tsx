@@ -13,6 +13,7 @@ type AuthState = {
   hasAccess: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshAccess: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -26,18 +27,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch profile for role
+      // 1. Fetch profile for role
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .maybeSingle();
 
-      if (profile) {
-        setRole(profile.role as Role);
-      }
+      const userRole = (profile?.role as Role) || "student";
+      setRole(userRole);
 
-      // Fetch course access
+      // 2. Fetch course access status
       const { data: access } = await supabase
         .from("course_access")
         .select("status")
@@ -45,9 +45,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("status", "active")
         .maybeSingle();
 
-      setHasAccess(!!access || profile?.role === "admin");
+      // User has access if they have an 'active' status OR if they are an admin
+      setHasAccess(!!access || userRole === "admin");
     } catch (error) {
       console.error("Error fetching user data:", error);
+      setHasAccess(false);
+    }
+  };
+
+  const refreshAccess = async () => {
+    if (user) {
+      await fetchUserData(user.id);
     }
   };
 
@@ -64,16 +72,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
-        fetchUserData(session.user.id);
+        setLoading(true);
+        await fetchUserData(session.user.id);
+        setLoading(false);
       } else {
         setRole("student");
         setHasAccess(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -88,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut: async () => {
       await supabase.auth.signOut();
     },
+    refreshAccess,
   }), [session, user, role, hasAccess, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
