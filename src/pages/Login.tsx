@@ -1,73 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { showError, showSuccess } from "@/utils/toast";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isPending, setIsPending] = useState(false);
+  const nav = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsPending(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) showError(error.message);
-    else showSuccess("Logged in successfully");
-    setIsPending(false);
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsPending(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) showError(error.message);
-    else showSuccess("Check your email for the confirmation link");
-    setIsPending(false);
-  };
+  React.useEffect(() => {
+    // Redirect to dashboard immediately since auth is disabled
+    nav("/dashboard");
+  }, [nav]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome</CardTitle>
-          <CardDescription>Login or create an account to continue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2 pt-2">
-              <Button onClick={handleLogin} disabled={isPending} className="w-full">
-                {isPending ? "Processing..." : "Login"}
-              </Button>
-              <Button onClick={handleSignup} variant="outline" disabled={isPending} className="w-full">
-                Sign Up
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <p className="text-slate-500 font-medium">Redirecting to dashboard...</p>
+      </div>
     </div>
   );
 }

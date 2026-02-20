@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -21,9 +21,12 @@ export default function Landing() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" className="rounded-xl">
+              <Link to="/dashboard">Preview course</Link>
+            </Button>
             <Button asChild className="rounded-xl bg-indigo-600 hover:bg-indigo-700">
-              <Link to="/dashboard">
-                Go to dashboard <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to={user ? "/dashboard" : "/login"}>
+                {user ? "Go to dashboard" : "Login"} <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -52,6 +55,11 @@ export default function Landing() {
               <Button asChild className="rounded-xl bg-indigo-600 hover:bg-indigo-700">
                 <Link to="/dashboard">
                   <PlayCircle className="mr-2 h-4 w-4" /> View student experience
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link to="/login">
+                  <BookOpen className="mr-2 h-4 w-4" /> Login to edit (admin)
                 </Link>
               </Button>
             </div>
@@ -99,9 +107,13 @@ export default function Landing() {
             <Link to="/dashboard" className="hover:text-slate-700 dark:hover:text-slate-300">
               Dashboard
             </Link>
+            <Link to="/login" className="hover:text-slate-700 dark:hover:text-slate-300">
+              Login
+            </Link>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+
