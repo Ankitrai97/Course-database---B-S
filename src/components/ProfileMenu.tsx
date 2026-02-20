@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogIn, LogOut, Shield, User, Settings } from "lucide-react";
+import { LogIn, LogOut, Shield, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -67,17 +67,6 @@ export default function ProfileMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
-        {role === "admin" && (
-          <>
-            <DropdownMenuItem onClick={() => nav("/admin")}>
-              <Settings className="mr-2 h-4 w-4" />
-              Admin Panel
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
-
         <DropdownMenuItem
           onClick={async () => {
             try {
@@ -102,3 +91,4 @@ export default function ProfileMenu() {
     </DropdownMenu>
   );
 }
+
