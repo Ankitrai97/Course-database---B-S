@@ -1,108 +1,144 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
-type Profile = {
-  id: string;
-  email: string | null;
-  role: string | null;
-  [key: string]: any;
-};
+type Role = "admin" | "student";
 
 type AuthState = {
   session: Session | null;
   user: User | null;
-  profile: Profile | null;
-  role: string | null;
+  role: Role;
   loading: boolean;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthState | undefined>(undefined);
+const AuthContext = createContext<AuthState | null>(null);
+
+async function fetchRole(userId: string, email?: string | null): Promise<Role> {
+  try {
+    // Primary: match by auth user id
+    const { data: byId, error: byIdError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (byIdError) {
+      console.error("[Auth] Error fetching profile by ID:", byIdError);
+    }
+
+    const roleFromId = byId?.role?.toLowerCase().trim();
+    if (roleFromId === "admin") {
+      console.log("[Auth] Admin role confirmed by ID");
+      return "admin";
+    }
+
+    // Fallback: match by email
+    if (email) {
+      const { data: byEmail, error: byEmailError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (byEmailError) {
+        console.error("[Auth] Error fetching profile by email:", byEmailError);
+      }
+
+      const roleFromEmail = byEmail?.role?.toLowerCase().trim();
+      if (roleFromEmail === "admin") {
+        console.log("[Auth] Admin role confirmed by email");
+        return "admin";
+      }
+    }
+
+    console.log("[Auth] Role resolved to student (no admin match found)");
+    return "student";
+  } catch (e) {
+    console.error("[Auth] Unexpected error in fetchRole:", e);
+    return "student";
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const [role, setRole] = useState<Role>("student");
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("[AuthContext] Error fetching profile:", error);
-        return null;
-      }
-      return data;
-    } catch (err) {
-      console.error("[AuthContext] Unexpected error fetching profile:", err);
-      return null;
-    }
-  };
-
   useEffect(() => {
-    const handleAuthStateChange = async (currentSession: Session | null) => {
-      setSession(currentSession);
-      const currentUser = currentSession?.user ?? null;
-      setUser(currentUser);
+    let mounted = true;
 
-      if (currentUser) {
-        const userProfile = await fetchProfile(currentUser.id);
-        setProfile(userProfile);
-        setRole(userProfile?.role ?? null);
-      } else {
-        setProfile(null);
-        setRole(null);
+    const init = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        const currentSession = data.session ?? null;
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          const userRole = await fetchRole(currentSession.user.id, currentSession.user.email);
+          setRole(userRole);
+        } else {
+          setRole("student");
+        }
+      } catch (e) {
+        console.error("[Auth] Init error:", e);
+      } finally {
+        if (mounted) setLoading(false);
       }
+    };
+
+    init();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (!mounted) return;
+      console.log("[Auth] Auth state change:", event);
+      setSession(newSession);
       
-      setLoading(false);
-    };
-
-    // 1. Initial session check
-    const initSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      await handleAuthStateChange(data.session);
-    };
-
-    initSession();
-
-    // 2. Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setLoading(true); // Set loading while we re-fetch profile on state change
-      await handleAuthStateChange(session);
+      if (newSession?.user) {
+        const userRole = await fetchRole(newSession.user.id, newSession.user.email);
+        setRole(userRole);
+      } else {
+        setRole("student");
+      }
     });
 
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
+      sub.subscription.unsubscribe();
     };
   }, []);
 
-  const value = {
-    session,
-    user,
-    profile,
-    role,
-    loading,
-  };
+  const value = useMemo<AuthState>(() => {
+    return {
+      session,
+      user: session?.user ?? null,
+      role,
+      loading,
+      signInWithGoogle: async () => {
+        const redirectTo = `${window.location.origin}/dashboard`;
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo },
+        });
+        if (error) throw error;
+      },
+      signOut: async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      },
+    };
+  }, [session, role, loading]);
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 }
