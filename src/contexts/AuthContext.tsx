@@ -18,36 +18,49 @@ type AuthState = {
 const AuthContext = createContext<AuthState | null>(null);
 
 async function fetchRole(userId: string, email?: string | null): Promise<Role> {
-  // Primary: match by auth user id (recommended)
-  const { data: byId, error: byIdError } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (byIdError) {
-    console.error("Failed to fetch profile role by id (RLS?)", byIdError);
-  }
-
-  if (byId?.role === "admin") return "admin";
-  if (byId?.role) return "student";
-
-  // Fallback: match by email (helps if profiles.id was not created from auth.users.id)
-  if (email) {
-    const { data: byEmail, error: byEmailError } = await supabase
+  try {
+    // Primary: match by auth user id
+    const { data: byId, error: byIdError } = await supabase
       .from("profiles")
       .select("role")
-      .eq("email", email)
+      .eq("id", userId)
       .maybeSingle();
 
-    if (byEmailError) {
-      console.error("Failed to fetch profile role by email (RLS?)", byEmailError);
+    if (byIdError) {
+      console.error("[Auth] Error fetching profile by ID:", byIdError);
     }
 
-    return byEmail?.role === "admin" ? "admin" : "student";
-  }
+    const roleFromId = byId?.role?.toLowerCase().trim();
+    if (roleFromId === "admin") {
+      console.log("[Auth] Admin role confirmed by ID");
+      return "admin";
+    }
 
-  return "student";
+    // Fallback: match by email
+    if (email) {
+      const { data: byEmail, error: byEmailError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (byEmailError) {
+        console.error("[Auth] Error fetching profile by email:", byEmailError);
+      }
+
+      const roleFromEmail = byEmail?.role?.toLowerCase().trim();
+      if (roleFromEmail === "admin") {
+        console.log("[Auth] Admin role confirmed by email");
+        return "admin";
+      }
+    }
+
+    console.log("[Auth] Role resolved to student (no admin match found)");
+    return "student";
+  } catch (e) {
+    console.error("[Auth] Unexpected error in fetchRole:", e);
+    return "student";
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -62,12 +75,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data } = await supabase.auth.getSession();
         if (!mounted) return;
-        setSession(data.session ?? null);
-        if (data.session?.user) {
-          setRole(await fetchRole(data.session.user.id, data.session.user.email));
+        
+        const currentSession = data.session ?? null;
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          const userRole = await fetchRole(currentSession.user.id, currentSession.user.email);
+          setRole(userRole);
         } else {
           setRole("student");
         }
+      } catch (e) {
+        console.error("[Auth] Init error:", e);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -75,11 +94,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (!mounted) return;
+      console.log("[Auth] Auth state change:", event);
       setSession(newSession);
+      
       if (newSession?.user) {
-        setRole(await fetchRole(newSession.user.id, newSession.user.email));
+        const userRole = await fetchRole(newSession.user.id, newSession.user.email);
+        setRole(userRole);
       } else {
         setRole("student");
       }
@@ -120,4 +142,3 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
-

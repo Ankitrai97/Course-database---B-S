@@ -48,9 +48,10 @@ const Index = () => {
   // Update active tab when admin status is confirmed
   useEffect(() => {
     if (!isAuthLoading) {
+      console.log("[Dashboard] Auth loaded. Role:", role, "IsAdmin:", isAdmin);
       setActiveTab(isAdmin ? "editor" : "viewer");
     }
-  }, [isAdmin, isAuthLoading]);
+  }, [isAdmin, isAuthLoading, role]);
 
   // Load course from Supabase on mount
   useEffect(() => {
@@ -63,7 +64,6 @@ const Index = () => {
           setCourse(loadedCourse);
           localStorage.setItem('course_data', JSON.stringify(loadedCourse));
         } else {
-          // No course found, create initial course in database
           await courseService.saveCourse(INITIAL_COURSE);
           localStorage.setItem('course_data', JSON.stringify(INITIAL_COURSE));
         }
