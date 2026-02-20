@@ -13,7 +13,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield, User, CheckCircle, XCircle, Loader2, Search } from "lucide-react";
+import { Shield, User, CheckCircle, XCircle, Loader2, Search, Database } from "lucide-react";
 import { showSuccess, showError } from "@/utils/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +27,7 @@ interface UserProfile {
 
 export default function Admin() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [testData, setTestData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const { role, user } = useAuth();
@@ -38,19 +39,18 @@ export default function Admin() {
       return;
     }
     fetchData();
+    fetchTestData();
   }, [role, navigate]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("id, email, role");
 
       if (profilesError) throw profilesError;
 
-      // Fetch access statuses
       const { data: accessData, error: accessError } = await supabase
         .from("course_access")
         .select("user_id, status");
@@ -67,6 +67,20 @@ export default function Admin() {
       showError(e.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTestData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("dyad_test_table")
+        .select("*");
+      
+      if (!error) {
+        setTestData(data || []);
+      }
+    } catch (e) {
+      // Table might not exist yet, ignore error
     }
   };
 
@@ -195,6 +209,18 @@ export default function Admin() {
             </TableBody>
           </Table>
         </div>
+
+        {testData.length > 0 && (
+          <div className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-800">
+            <div className="flex items-center gap-2 mb-4 text-indigo-600 dark:text-indigo-400">
+              <Database size={20} />
+              <h2 className="font-bold">Database Connection Test</h2>
+            </div>
+            {testData.map((item, i) => (
+              <p key={i} className="text-sm font-medium">{item.message}</p>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
