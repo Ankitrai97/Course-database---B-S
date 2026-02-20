@@ -1,8 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
 
 type Role = "admin" | "student";
 
@@ -17,122 +16,34 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null);
 
-async function fetchRole(userId: string, email?: string | null): Promise<Role> {
-  try {
-    // Primary: match by auth user id
-    const { data: byId, error: byIdError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (byIdError) {
-      console.error("[Auth] Error fetching profile by ID:", byIdError);
-    }
-
-    const roleFromId = byId?.role?.toLowerCase().trim();
-    if (roleFromId === "admin") {
-      console.log("[Auth] Admin role confirmed by ID");
-      return "admin";
-    }
-
-    // Fallback: match by email
-    if (email) {
-      const { data: byEmail, error: byEmailError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("email", email)
-        .maybeSingle();
-
-      if (byEmailError) {
-        console.error("[Auth] Error fetching profile by email:", byEmailError);
-      }
-
-      const roleFromEmail = byEmail?.role?.toLowerCase().trim();
-      if (roleFromEmail === "admin") {
-        console.log("[Auth] Admin role confirmed by email");
-        return "admin";
-      }
-    }
-
-    console.log("[Auth] Role resolved to student (no admin match found)");
-    return "student";
-  } catch (e) {
-    console.error("[Auth] Unexpected error in fetchRole:", e);
-    return "student";
-  }
-}
+// Mock user for development without auth
+const MOCK_USER: User = {
+  id: "dev-user",
+  email: "admin@example.com",
+  app_metadata: {},
+  user_metadata: {
+    full_name: "Developer Admin",
+  },
+  aud: "authenticated",
+  created_at: new Date().toISOString(),
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<Role>("student");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const init = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (!mounted) return;
-        
-        const currentSession = data.session ?? null;
-        setSession(currentSession);
-        
-        if (currentSession?.user) {
-          const userRole = await fetchRole(currentSession.user.id, currentSession.user.email);
-          setRole(userRole);
-        } else {
-          setRole("student");
-        }
-      } catch (e) {
-        console.error("[Auth] Init error:", e);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    init();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (!mounted) return;
-      console.log("[Auth] Auth state change:", event);
-      setSession(newSession);
-      
-      if (newSession?.user) {
-        const userRole = await fetchRole(newSession.user.id, newSession.user.email);
-        setRole(userRole);
-      } else {
-        setRole("student");
-      }
-    });
-
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
+  // Auth is now disabled/mocked
   const value = useMemo<AuthState>(() => {
     return {
-      session,
-      user: session?.user ?? null,
-      role,
-      loading,
+      session: { user: MOCK_USER, access_token: "mock", refresh_token: "mock", expires_in: 3600, token_type: "bearer" } as Session,
+      user: MOCK_USER,
+      role: "admin", // Hardcoded to admin so you can use the editor
+      loading: false,
       signInWithGoogle: async () => {
-        const redirectTo = `${window.location.origin}/dashboard`;
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: { redirectTo },
-        });
-        if (error) throw error;
+        console.log("Auth is disabled: signInWithGoogle called");
       },
       signOut: async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        console.log("Auth is disabled: signOut called");
       },
     };
-  }, [session, role, loading]);
+  }, []);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
