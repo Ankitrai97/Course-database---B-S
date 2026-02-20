@@ -1,34 +1,46 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import { AuthProvider } from "@/contexts/AuthContext";
+"use client";
 
-const queryClient = new QueryClient();
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import Login from "./pages/Login";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+
+const AuthGuard = () => {
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Login />;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
+      <h1 className="text-2xl font-bold">You are logged in</h1>
+      <p className="text-slate-500">{session.user.email}</p>
+      <Button 
+        variant="outline" 
+        onClick={() => supabase.auth.signOut()}
+      >
+        Logout
+      </Button>
+    </div>
+  );
+};
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <AuthProvider>
+    <AuthGuard />
+    <Toaster />
+  </AuthProvider>
 );
 
 export default App;

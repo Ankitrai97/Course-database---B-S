@@ -1,55 +1,67 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-
-type Role = "admin" | "student";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 type AuthState = {
   session: Session | null;
   user: User | null;
-  role: Role;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthState | null>(null);
-
-// Mock user for development without auth
-const MOCK_USER: User = {
-  id: "dev-user",
-  email: "admin@example.com",
-  app_metadata: {},
-  user_metadata: {
-    full_name: "Developer Admin",
-  },
-  aud: "authenticated",
-  created_at: new Date().toISOString(),
-};
+const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Auth is now disabled/mocked
-  const value = useMemo<AuthState>(() => {
-    return {
-      session: { user: MOCK_USER, access_token: "mock", refresh_token: "mock", expires_in: 3600, token_type: "bearer" } as Session,
-      user: MOCK_USER,
-      role: "admin", // Hardcoded to admin so you can use the editor
-      loading: false,
-      signInWithGoogle: async () => {
-        console.log("Auth is disabled: signInWithGoogle called");
-      },
-      signOut: async () => {
-        console.log("Auth is disabled: signOut called");
-      },
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 1. Initial session check
+    const initSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+      } catch (error) {
+        console.error("[AuthContext] Error getting initial session:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initSession();
+
+    // 2. Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
     };
   }, []);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const value = {
+    session,
+    user,
+    loading,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
