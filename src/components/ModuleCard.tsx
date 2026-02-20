@@ -2,18 +2,26 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Layers } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Trash2, Layers } from "lucide-react";
 import ChapterManager from './ChapterManager';
-import { Module, Lesson } from '@/types/course';
+import { Module, Chapter, Lesson } from '@/types/course';
 
 interface ModuleCardProps {
   module: Module;
+  onUpdate: (updates: Partial<Module>) => void;
+  onDelete: () => void;
+  isEditable?: boolean;
   onSelectLesson?: (lesson: Lesson) => void;
   activeLessonId?: string;
 }
 
 const ModuleCard = ({ 
   module, 
+  onUpdate, 
+  onDelete, 
+  isEditable = true,
   onSelectLesson,
   activeLessonId
 }: ModuleCardProps) => {
@@ -25,13 +33,33 @@ const ModuleCard = ({
             <Layers size={24} />
           </div>
           <div className="flex-1">
-            <CardTitle className="text-xl font-bold">{module.title}</CardTitle>
+            {isEditable ? (
+              <Input
+                value={module.title}
+                onChange={(e) => onUpdate({ title: e.target.value })}
+                className="text-xl font-bold bg-transparent border-none p-0 focus-visible:ring-0"
+              />
+            ) : (
+              <CardTitle className="text-xl font-bold">{module.title}</CardTitle>
+            )}
           </div>
         </div>
+        {isEditable && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onDelete}
+            className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl"
+          >
+            <Trash2 size={20} />
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="p-6">
         <ChapterManager 
           chapters={module.chapters}
+          onUpdateChapters={(chapters) => onUpdate({ chapters })}
+          isEditable={isEditable}
           onSelectLesson={onSelectLesson}
           activeLessonId={activeLessonId}
         />
