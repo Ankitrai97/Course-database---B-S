@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Video, FileText, PlayCircle } from "lucide-react";
+import { Plus, Trash2, Video, FileText, PlayCircle, Lock } from "lucide-react";
 import { Lesson } from '@/types/course';
 
 interface LessonListProps {
@@ -14,6 +14,7 @@ interface LessonListProps {
   onSelect?: (lesson: Lesson) => void;
   activeLessonId?: string;
   isEditable?: boolean;
+  isLocked?: boolean;
 }
 
 const LessonList = ({ 
@@ -23,7 +24,8 @@ const LessonList = ({
   onUpdate, 
   onSelect, 
   activeLessonId,
-  isEditable = true 
+  isEditable = true,
+  isLocked = false
 }: LessonListProps) => {
   return (
     <div className="space-y-3 pl-4 border-l-2 border-indigo-100 dark:border-indigo-900/30 ml-2">
@@ -34,7 +36,7 @@ const LessonList = ({
             activeLessonId === lesson.id 
             ? 'bg-indigo-50 dark:bg-indigo-900/40 border-indigo-200 dark:border-indigo-800' 
             : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
-          }`}
+          } ${isLocked ? 'opacity-75' : ''}`}
         >
           <div className="flex items-center gap-3">
             <div className="flex-1 flex items-center gap-2">
@@ -47,10 +49,14 @@ const LessonList = ({
                 />
               ) : (
                 <button 
-                  onClick={() => onSelect?.(lesson)}
-                  className="flex-1 text-left font-medium text-sm flex items-center gap-2"
+                  onClick={() => !isLocked && onSelect?.(lesson)}
+                  className={`flex-1 text-left font-medium text-sm flex items-center gap-2 ${isLocked ? 'cursor-not-allowed' : ''}`}
                 >
-                  <PlayCircle size={16} className="text-indigo-500" />
+                  {isLocked ? (
+                    <Lock size={16} className="text-slate-400" />
+                  ) : (
+                    <PlayCircle size={16} className="text-indigo-500" />
+                  )}
                   {lesson.title}
                 </button>
               )}
