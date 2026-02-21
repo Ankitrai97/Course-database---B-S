@@ -219,7 +219,8 @@ const CourseViewer = () => {
           )}
 
           <TabsContent value="viewer" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Side: Course Content (Scrollable) */}
               <div className="lg:col-span-4 space-y-4">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   < BookOpen size={20} className="text-indigo-600" />
@@ -238,7 +239,8 @@ const CourseViewer = () => {
                 ))}
               </div>
 
-              <div className="lg:col-span-8">
+              {/* Right Side: Video & Resources (Sticky) */}
+              <div className="lg:col-span-8 sticky top-24 space-y-6">
                 {!isActive ? (
                   <div className="flex flex-col items-center justify-center bg-white dark:bg-slate-900 rounded-3xl h-[600px] border-2 border-dashed text-center p-12 shadow-xl">
                     <div className="w-20 h-20 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 mb-6">
