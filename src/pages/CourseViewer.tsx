@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Layout, User, Sparkles, Rocket, ExternalLink, BookOpen, PlayCircle, Loader2, Save, ShieldCheck, Lock, CreditCard } from "lucide-react";
+import { Plus, Layout, User, Sparkles, ExternalLink, BookOpen, PlayCircle, Loader2, Save, ShieldCheck, Lock, ArrowLeft } from "lucide-react";
 import ModuleCard from '@/components/ModuleCard';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Course, Module, Lesson } from '@/types/course';
@@ -35,7 +36,9 @@ const INITIAL_COURSE: Course = {
   ]
 };
 
-const Index = () => {
+const CourseViewer = () => {
+  const { courseId } = useParams();
+  const navigate = useNavigate();
   const [course, setCourse] = useState<Course>(INITIAL_COURSE);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,19 +59,18 @@ const Index = () => {
     const loadCourse = async () => {
       try {
         setIsLoading(true);
-        const loadedCourse = await courseService.getCourse('main-course');
+        const targetId = courseId || 'main-course';
+        const loadedCourse = await courseService.getCourse(targetId);
         
         if (loadedCourse) {
           setCourse(loadedCourse);
         } else if (isAdmin) {
-          await courseService.saveCourse(INITIAL_COURSE);
-          setCourse(INITIAL_COURSE);
+          const newCourse = { ...INITIAL_COURSE, id: targetId };
+          await courseService.saveCourse(newCourse);
+          setCourse(newCourse);
         }
       } catch (error: any) {
         console.error('Error loading course:', error);
-        if (error.message?.includes('403') || error.message?.includes('policy')) {
-          console.log("Access restricted by RLS");
-        }
       } finally {
         setIsLoading(false);
       }
@@ -77,7 +79,7 @@ const Index = () => {
     if (!isAuthLoading) {
       loadCourse();
     }
-  }, [isAuthLoading, isAdmin]);
+  }, [isAuthLoading, isAdmin, courseId]);
 
   const handleSaveToDatabase = async () => {
     try {
@@ -124,25 +126,30 @@ const Index = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 pb-20">
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg">
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight">{course.title}</h1>
-                {isAdmin && (
-                  <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-none gap-1">
-                    <ShieldCheck size={12} /> Admin
-                  </Badge>
-                )}
-                {!isActive && !isAuthLoading && (
-                  <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50 gap-1">
-                    <Lock size={10} /> Premium
-                  </Badge>
-                )}
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="rounded-xl">
+              <ArrowLeft size={20} />
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <Sparkles size={20} />
               </div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Learning Portal</p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold tracking-tight">{course.title}</h1>
+                  {isAdmin && (
+                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-none gap-1">
+                      <ShieldCheck size={12} /> Admin
+                    </Badge>
+                  )}
+                  {!isActive && !isAuthLoading && (
+                    <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50 gap-1">
+                      <Lock size={10} /> Premium
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Learning Portal</p>
+              </div>
             </div>
           </div>
           
@@ -163,7 +170,7 @@ const Index = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 mt-12">
-        {isAuthLoading ? (
+        {isAuthLoading || isLoading ? (
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
           </div>
@@ -171,7 +178,7 @@ const Index = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 italic">DASHBOARD</h2>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 italic uppercase">{course.title}</h2>
                 <p className="text-slate-500">
                   {isActive ? "Welcome back! Continue your learning journey." : "Upgrade to access premium course content."}
                 </p>
@@ -285,4 +292,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default CourseViewer;
