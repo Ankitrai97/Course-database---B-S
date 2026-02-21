@@ -12,6 +12,7 @@ import { courseService } from '@/lib/courseService';
 import ProfileMenu from '@/components/ProfileMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
+import UpgradeButtons from '@/components/UpgradeButtons';
 
 const INITIAL_COURSE: Course = {
   id: 'main-course',
@@ -65,7 +66,6 @@ const Index = () => {
         }
       } catch (error: any) {
         console.error('Error loading course:', error);
-        // If RLS blocks it, we'll just show the initial course structure but lessons will be locked
         if (error.message?.includes('403') || error.message?.includes('policy')) {
           console.log("Access restricted by RLS");
         }
@@ -215,7 +215,7 @@ const Index = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-4 space-y-4">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <BookOpen size={20} className="text-indigo-600" />
+                  < BookOpen size={20} className="text-indigo-600" />
                   Course Content
                 </h3>
                 {course.modules.map((module) => (
@@ -227,8 +227,6 @@ const Index = () => {
                     onDelete={() => {}}
                     onSelectLesson={setActiveLesson}
                     activeLessonId={activeLesson?.id}
-                    // Pass locked state to ModuleCard (which passes to LessonList)
-                    // In a real app, we'd add isLocked to ModuleCard props
                   />
                 ))}
               </div>
@@ -243,9 +241,7 @@ const Index = () => {
                     <p className="text-slate-500 max-w-sm mx-auto mb-8">
                       This course is exclusive to premium members. Complete your subscription to unlock all modules, videos, and materials.
                     </p>
-                    <Button className="rounded-2xl h-14 px-8 bg-indigo-600 hover:bg-indigo-700 text-lg font-bold gap-2 shadow-lg shadow-indigo-200">
-                      <CreditCard size={20} /> Upgrade to Premium
-                    </Button>
+                    <UpgradeButtons />
                   </div>
                 ) : activeLesson ? (
                   <div className="space-y-6">

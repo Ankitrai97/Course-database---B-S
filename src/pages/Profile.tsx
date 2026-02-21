@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { showSuccess, showError } from "@/utils/toast";
 import { User, CreditCard, LogOut, ArrowLeft, Loader2, Save, CheckCircle2, XCircle } from "lucide-react";
 import ProfileMenu from "@/components/ProfileMenu";
+import UpgradeButtons from "@/components/UpgradeButtons";
 
 export default function Profile() {
   const { user, subscriptionStatus, signOut, loading: authLoading } = useAuth();
@@ -148,9 +149,7 @@ export default function Profile() {
                   </Badge>
                 </div>
                 {!isActive && (
-                  <Button className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 dark:shadow-none">
-                    Upgrade Now
-                  </Button>
+                  <UpgradeButtons vertical className="mt-2" />
                 )}
               </CardContent>
             </Card>
