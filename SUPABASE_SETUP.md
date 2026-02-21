@@ -1,6 +1,6 @@
 # Supabase Database Setup Guide
 
-This guide will help you set up your Supabase database to sync course data.
+This guide will help you set up your Supabase database to sync course data and automate user onboarding.
 
 ## Quick Setup (Recommended)
 
@@ -13,47 +13,41 @@ This guide will help you set up your Supabase database to sync course data.
    - Copy the contents of `supabase-simple-schema.sql`
    - Paste and click **Run**
 
-3. **Done!** The app will now save course data to Supabase.
+3. **Set up Automation Triggers**
+   - Run the following SQL to automatically create profiles and course access for new users:
+   ```sql
+   CREATE OR REPLACE FUNCTION public.handle_new_user()
+   RETURNS TRIGGER
+   LANGUAGE PLPGSQL
+   SECURITY DEFINER SET search_path = ''
+   AS $$
+   BEGIN
+     INSERT INTO public.profiles (id, email, role)
+     VALUES (new.id, new.email, 'student');
 
-## Alternative: Multi-Table Schema
+     INSERT INTO public.course_access (user_id, status)
+     VALUES (new.id, 'inactive');
 
-For the normalized schema (courses, modules, chapters, lessons tables), use `supabase-schema.sql` instead. The app currently uses the **simple single-table** approach.
+     RETURN new;
+   END;
+   $$;
 
-4. **Verify Environment Variables**
-   Make sure your `.env` file contains:
+   CREATE TRIGGER on_auth_user_created
+     AFTER INSERT ON auth.users
+     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
    ```
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-anon-key
-   ```
 
-5. **Test the Connection**
-   - Start your development server: `npm run dev`
-   - The app will automatically:
-     - Load existing course data from Supabase on startup
-     - Create the initial course if none exists
-     - Sync all changes to the database automatically (with 1 second debounce)
+4. **Done!** The app will now:
+   - Save course data to Supabase.
+   - Automatically create an "inactive" subscription for every new student.
 
 ## How It Works
 
-- **Automatic Sync**: All course updates (modules, chapters, lessons) are automatically saved to Supabase with a 1-second debounce to prevent excessive API calls
-- **Fallback**: If Supabase is unavailable, the app falls back to localStorage
-- **Loading States**: The UI shows loading indicators while fetching/saving data
-- **Error Handling**: Errors are displayed via toast notifications
-
-## Database Structure
-
-```
-courses
-  └── modules
-       └── chapters
-            └── lessons
-```
-
-All relationships use CASCADE DELETE, so deleting a course will automatically delete all related modules, chapters, and lessons.
+- **Automatic Onboarding**: The database trigger ensures that as soon as a user signs up via Google or Email, they have a profile and a course access record ready to be updated by your n8n workflow.
+- **Automatic Sync**: All course updates (modules, chapters, lessons) are automatically saved to Supabase with a 1-second debounce.
+- **Fallback**: If Supabase is unavailable, the app falls back to localStorage.
 
 ## Security Notes
 
-The current setup uses public read/write access. For production, you should:
-1. Implement authentication
-2. Update RLS policies to restrict access based on user roles
-3. Consider using service role keys for admin operations
+- **RLS Policies**: Ensure Row Level Security is enabled. Students can only see their own `course_access` and `profiles`.
+- **Admin Role**: To edit the course, manually change a user's `role` to 'admin' in the `profiles` table.
