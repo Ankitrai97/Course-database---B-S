@@ -18,7 +18,8 @@ export default function Dashboard() {
       title: "Build and Sell with AI",
       description: "Master the art of building AI-powered applications and turning them into profitable businesses.",
       moduleCount: 1,
-      isLocked: !isPremium
+      isLocked: !isPremium,
+      thumbnailUrl: "/course-thumbnail.gif"
     }
   ];
 
