@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +29,13 @@ const ChapterManager = ({
   activeLessonId
 }: ChapterManagerProps) => {
   
+  // Find the ID of the chapter that contains the active lesson to expand it by default
+  const defaultExpandedChapter = useMemo(() => {
+    if (!activeLessonId) return [];
+    const chapter = chapters.find(c => c.lessons.some(l => l.id === activeLessonId));
+    return chapter ? [chapter.id] : [];
+  }, [chapters, activeLessonId]);
+
   const addChapter = () => {
     const newChapter: Chapter = {
       id: Math.random().toString(36).substr(2, 9),
@@ -86,7 +93,11 @@ const ChapterManager = ({
 
   return (
     <div className="space-y-4">
-      <Accordion type="multiple" className="w-full space-y-2">
+      <Accordion 
+        type="multiple" 
+        className="w-full space-y-2"
+        defaultValue={defaultExpandedChapter}
+      >
         {chapters.map((chapter) => (
           <AccordionItem 
             key={chapter.id} 
