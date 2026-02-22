@@ -1,23 +1,45 @@
 "use client";
 
-import React from "react";
-import { Sparkles, Search } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Sparkles, Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ProfileMenu from "@/components/ProfileMenu";
 import CourseCard from "@/components/CourseCard";
 import { useAuth } from "@/contexts/AuthContext";
+import { courseService } from "@/lib/courseService";
+import { Course } from "@/types/course";
 
 export default function Dashboard() {
-  const { subscriptionStatus, role } = useAuth();
+  const { subscriptionStatus, role, loading: authLoading } = useAuth();
+  const [courseData, setCourseData] = useState<Course | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const isPremium = subscriptionStatus === "active" || role === "admin";
 
-  // In the future, this could come from a database table of courses
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const data = await courseService.getCourse("main-course");
+        if (data) {
+          setCourseData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching course for dashboard:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourse();
+  }, []);
+
+  // Fallback or dynamic course list
   const courses = [
     {
       id: "main-course",
-      title: "Build and Sell with AI",
-      description: "Master the art of building AI-powered applications and turning them into profitable businesses.",
-      moduleCount: 1,
+      title: courseData?.title || "Build and Sell with AI",
+      description: courseData?.description || "Master the art of building AI-powered applications and turning them into profitable businesses.",
+      moduleCount: courseData?.modules?.length || 0,
       isLocked: !isPremium,
       thumbnailUrl: "/course-thumbnail.gif"
     }
@@ -53,11 +75,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses.map((course) => (
-            <CourseCard key={course.id} {...course} />
-          ))}
-        </div>
+        {isLoading || authLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course) => (
+              <CourseCard key={course.id} {...course} />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
