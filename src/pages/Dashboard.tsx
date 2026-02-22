@@ -80,7 +80,7 @@ export default function Dashboard() {
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 group">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-indigo-600 dark:text-indigo-400 font-black text-base">{studentCount}+</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 font-black text-base">{studentCount}</span>
                   <span className="text-slate-900 dark:text-slate-100 font-bold text-sm tracking-tight">Students Enrolled</span>
                   <div className="relative flex h-2 w-2 ml-1">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
