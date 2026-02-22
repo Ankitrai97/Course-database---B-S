@@ -1,36 +1,50 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Sparkles, Search, Loader2 } from "lucide-react";
+import { Sparkles, Search, Loader2, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ProfileMenu from "@/components/ProfileMenu";
 import CourseCard from "@/components/CourseCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { courseService } from "@/lib/courseService";
 import { Course } from "@/types/course";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
   const { subscriptionStatus, role, loading: authLoading } = useAuth();
   const [courseData, setCourseData] = useState<Course | null>(null);
+  const [studentCount, setStudentCount] = useState(50);
   const [isLoading, setIsLoading] = useState(true);
   
   const isPremium = subscriptionStatus === "active" || role === "admin";
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchData = async () => {
       try {
+        setIsLoading(true);
+        
+        // Fetch course data
         const data = await courseService.getCourse("main-course");
         if (data) {
           setCourseData(data);
         }
+
+        // Fetch total profiles count
+        const { count, error } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error && count !== null) {
+          setStudentCount(50 + count);
+        }
       } catch (error) {
-        console.error("Error fetching course for dashboard:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCourse();
+    fetchData();
   }, []);
 
   // Fallback or dynamic course list
@@ -61,9 +75,15 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto px-6 mt-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2">
-            <h2 className="text-4xl font-black tracking-tight italic">MY COURSES</h2>
-            <p className="text-slate-500">Select a course to continue your journey.</p>
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">
+              <Users size={14} />
+              {studentCount} Students Enrolled
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-4xl font-black tracking-tight italic">MY COURSES</h2>
+              <p className="text-slate-500">Select a course to continue your journey.</p>
+            </div>
           </div>
           
           <div className="relative w-full md:w-80">
