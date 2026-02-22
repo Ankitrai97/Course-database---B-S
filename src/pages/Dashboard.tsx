@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Sparkles, LayoutGrid, Search } from "lucide-react";
+import { Sparkles, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ProfileMenu from "@/components/ProfileMenu";
 import CourseCard from "@/components/CourseCard";
@@ -57,17 +57,6 @@ export default function Dashboard() {
           {courses.map((course) => (
             <CourseCard key={course.id} {...course} />
           ))}
-          
-          {/* Future Course Placeholder */}
-          <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center p-12 text-center space-y-4 group hover:border-indigo-300 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 group-hover:text-indigo-400 transition-colors">
-              <LayoutGrid size={32} />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-400">More Coming Soon</h3>
-              <p className="text-sm text-slate-400">New AI courses are in development.</p>
-            </div>
-          </div>
         </div>
       </main>
     </div>
