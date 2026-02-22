@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Sparkles, Search, Loader2, Users, TrendingUp } from "lucide-react";
+import { Sparkles, Search, Loader2, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ProfileMenu from "@/components/ProfileMenu";
 import CourseCard from "@/components/CourseCard";
@@ -76,29 +76,18 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-6 mt-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-6">
-            {/* Enhanced Student Count Badge */}
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 group">
-              <div className="flex -space-x-2 mr-1">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <img 
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} 
-                      alt="Student" 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                ))}
-              </div>
+            {/* Enhanced Student Count Badge without avatars */}
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 group">
               <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-indigo-600 dark:text-indigo-400 font-bold text-sm">{studentCount}+</span>
-                  <span className="text-slate-900 dark:text-slate-100 font-semibold text-sm tracking-tight">Students Enrolled</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-indigo-600 dark:text-indigo-400 font-black text-base">{studentCount}+</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold text-sm tracking-tight">Students Enrolled</span>
                   <div className="relative flex h-2 w-2 ml-1">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+                <div className="flex items-center gap-1 text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
                   <TrendingUp size={10} className="text-emerald-500" />
                   Growing Community
                 </div>
