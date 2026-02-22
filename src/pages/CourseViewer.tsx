@@ -81,6 +81,19 @@ const CourseViewer = () => {
     }
   }, [isAuthLoading, isAdmin, courseId]);
 
+  // Automatically select the first lesson for active users
+  useEffect(() => {
+    if (!isLoading && isActive && !activeLesson && course.modules.length > 0) {
+      const firstModule = course.modules[0];
+      if (firstModule.chapters.length > 0) {
+        const firstChapter = firstModule.chapters[0];
+        if (firstChapter.lessons.length > 0) {
+          setActiveLesson(firstChapter.lessons[0]);
+        }
+      }
+    }
+  }, [isLoading, isActive, activeLesson, course]);
+
   const handleSaveToDatabase = async () => {
     try {
       setIsSaving(true);
