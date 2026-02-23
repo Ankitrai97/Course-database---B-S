@@ -1,14 +1,35 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, CheckCircle2, PlayCircle, Sparkles, Rocket, Zap, Target, Globe } from "lucide-react";
+import { ArrowRight, BookOpen, PlayCircle, Sparkles, Rocket, Zap, Target, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import Logo from "@/components/Logo";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Landing() {
   const { user } = useAuth();
+  const [studentCount, setStudentCount] = useState<number>(50);
+
+  useEffect(() => {
+    const fetchStudentCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error && count !== null) {
+          // We use 50 as a base offset for social proof, matching the dashboard logic
+          setStudentCount(50 + count);
+        }
+      } catch (error) {
+        console.error("Error fetching student count:", error);
+      }
+    };
+
+    fetchStudentCount();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -37,7 +58,7 @@ export default function Landing() {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200/60 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-950/30 px-4 py-2 text-sm font-bold text-indigo-700 dark:text-indigo-300 animate-in fade-in slide-in-from-top-4 duration-700">
               <Sparkles className="h-4 w-4" />
-              Join 50+ ambitious AI creators
+              Join {studentCount}+ ambitious AI creators
             </div>
 
             <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] text-slate-900 dark:text-white">
@@ -91,10 +112,10 @@ export default function Landing() {
                   <div className="text-3xl font-black mb-6">Master the AI Stack</div>
                   <div className="grid grid-cols-1 gap-4">
                     {[
-                      "Finding Profitable AI Ideas",
-                      "Building with LLMs & APIs",
-                      "No-Code App Development",
-                      "Marketing & Scaling Your Service"
+                      "Module 1: Finding Profitable AI Ideas",
+                      "Module 2: Building with LLMs & APIs",
+                      "Module 3: No-Code App Development",
+                      "Module 4: Marketing & Scaling Your SaaS"
                     ].map((module, i) => (
                       <div key={i} className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-default">
                         <div className="w-8 h-8 rounded-lg bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-bold text-sm">
@@ -114,7 +135,7 @@ export default function Landing() {
                     </div>
                   ))}
                   <div className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">
-                    +50
+                    +{studentCount}
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 font-medium">
