@@ -57,9 +57,9 @@ export default function Landing() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2.5 rounded-full border border-indigo-200/60 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-950/30 px-4 py-2 text-sm font-bold text-indigo-700 dark:text-indigo-300 animate-in fade-in slide-in-from-top-4 duration-700">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-blink shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
               <Sparkles className="h-4 w-4" />
               Join {studentCount}+ ambitious AI creators
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-blink shadow-[0_0_8px_rgba(16,185,129,0.6)] ml-1" />
             </div>
 
             <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] text-slate-900 dark:text-white">
