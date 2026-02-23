@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Layout, User, Sparkles, ExternalLink, BookOpen, PlayCircle, Loader2, Save, ShieldCheck, Lock, ArrowLeft } from "lucide-react";
+import { Plus, Layout, User, ExternalLink, BookOpen, PlayCircle, Loader2, Save, ShieldCheck, Lock, ArrowLeft } from "lucide-react";
 import ModuleCard from '@/components/ModuleCard';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Course, Module, Lesson } from '@/types/course';
@@ -14,6 +14,7 @@ import ProfileMenu from '@/components/ProfileMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import UpgradeButtons from '@/components/UpgradeButtons';
+import Logo from '@/components/Logo';
 
 const INITIAL_COURSE: Course = {
   id: 'main-course',
@@ -144,9 +145,7 @@ const CourseViewer = () => {
               <ArrowLeft size={20} />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg">
-                <Sparkles size={20} />
-              </div>
+              <Logo size="md" />
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-bold tracking-tight">{course.title}</h1>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Sparkles, Search, Loader2, TrendingUp, Users } from "lucide-react";
+import { Search, Loader2, TrendingUp, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ProfileMenu from "@/components/ProfileMenu";
 import CourseCard from "@/components/CourseCard";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { courseService } from "@/lib/courseService";
 import { Course } from "@/types/course";
 import { supabase } from "@/integrations/supabase/client";
+import Logo from "@/components/Logo";
 
 export default function Dashboard() {
   const { subscriptionStatus, role, loading: authLoading } = useAuth();
@@ -68,9 +69,7 @@ export default function Dashboard() {
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg">
-              <Sparkles size={20} />
-            </div>
+            <Logo size="md" />
             <h1 className="text-xl font-bold tracking-tight">Learning Hub</h1>
           </div>
           <ProfileMenu />

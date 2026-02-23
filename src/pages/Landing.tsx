@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import Logo from "@/components/Logo";
 
 export default function Landing() {
   const { user } = useAuth();
@@ -14,9 +15,7 @@ export default function Landing() {
       <header className="sticky top-0 z-50 border-b border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-900/50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg">
-              <Sparkles size={18} />
-            </div>
+            <Logo size="sm" />
             <div className="font-black tracking-tight">Build & Sell with AI</div>
           </div>
 
@@ -116,4 +115,3 @@ export default function Landing() {
     </div>
   );
 }
-
