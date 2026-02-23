@@ -139,7 +139,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 font-medium">
-                  Trusted by creators worldwide
+                  Trusted by builders worldwide
                 </div>
               </div>
             </div>
