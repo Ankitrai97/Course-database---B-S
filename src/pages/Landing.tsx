@@ -67,7 +67,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-xl text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
-              The ultimate blueprint to master AI development, automate workflows, and launch profitable digital products without writing complex code.
+              The ultimate blueprint to master AI development, automate workflows, and launch profitable digital products without writing complex code
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
