@@ -13,6 +13,7 @@ import { showSuccess, showError } from "@/utils/toast";
 import { User, CreditCard, LogOut, ArrowLeft, Loader2, Save, CheckCircle2, XCircle } from "lucide-react";
 import ProfileMenu from "@/components/ProfileMenu";
 import UpgradeButtons from "@/components/UpgradeButtons";
+import ShareCourse from "@/components/ShareCourse";
 
 export default function Profile() {
   const { user, subscriptionStatus, signOut, loading: authLoading } = useAuth();
@@ -156,7 +157,7 @@ export default function Profile() {
           </div>
 
           {/* Main Form */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 space-y-8">
             <Card className="border-none shadow-xl shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 rounded-3xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -198,6 +199,8 @@ export default function Profile() {
                 </form>
               </CardContent>
             </Card>
+
+            <ShareCourse />
           </div>
         </div>
       </main>
