@@ -114,7 +114,7 @@ export default function Landing() {
                     {[
                       "Finding Profitable AI Ideas",
                       "Building with LLMs & APIs",
-                      "No-Code App Development",
+                      "No-Code WebApp Development",
                       "Marketing & Scaling Your Ai Services"
                     ].map((module, i) => (
                       <div key={i} className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-default">
