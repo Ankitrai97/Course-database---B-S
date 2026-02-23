@@ -91,10 +91,10 @@ export default function Landing() {
                   <div className="text-3xl font-black mb-6">Master the AI Stack</div>
                   <div className="grid grid-cols-1 gap-4">
                     {[
-                      "Module 1: Finding Profitable AI Ideas",
-                      "Module 2: Building with LLMs & APIs",
-                      "Module 3: No-Code App Development",
-                      "Module 4: Marketing & Scaling Your SaaS"
+                      "Finding Profitable AI Ideas",
+                      "Building with LLMs & APIs",
+                      "No-Code App Development",
+                      "Marketing & Scaling Your Service"
                     ].map((module, i) => (
                       <div key={i} className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-default">
                         <div className="w-8 h-8 rounded-lg bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-bold text-sm">
