@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import TermsDialog from "@/components/TermsDialog";
 
 export default function Landing() {
   const { user } = useAuth();
@@ -20,7 +21,6 @@ export default function Landing() {
           .select('*', { count: 'exact', head: true });
         
         if (!error && count !== null) {
-          // We use 50 as a base offset for social proof, matching the dashboard logic
           setStudentCount(50 + count);
         }
       } catch (error) {
@@ -62,12 +62,12 @@ export default function Landing() {
             </div>
 
             <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] text-slate-900 dark:text-white">
-              Build & Sell Your 
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">AI Service in Weeks</span>
+              Build & Sell Your Own 
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">AI Apps in Weeks.</span>
             </h1>
 
             <p className="text-xl text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
-              The ultimate blueprint to master AI development, automate workflows, and launch profitable digital products without writing complex code
+              The ultimate blueprint for creators to master AI development, automate workflows, and launch profitable digital products without writing complex code.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -112,10 +112,10 @@ export default function Landing() {
                   <div className="text-3xl font-black mb-6">Master the AI Stack</div>
                   <div className="grid grid-cols-1 gap-4">
                     {[
-                      "Finding Profitable AI Services",
-                      "Building with LLMs & APIs",
-                      "No-Code App Development",
-                      "Marketing & Scaling Your Ai Services"
+                      "Module 1: Finding Profitable AI Ideas",
+                      "Module 2: Building with LLMs & APIs",
+                      "Module 3: No-Code App Development",
+                      "Module 4: Marketing & Scaling Your SaaS"
                     ].map((module, i) => (
                       <div key={i} className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-default">
                         <div className="w-8 h-8 rounded-lg bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-bold text-sm">
@@ -139,7 +139,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 font-medium">
-                  Trusted by Builders worldwide
+                  Trusted by creators worldwide
                 </div>
               </div>
             </div>
@@ -158,16 +158,8 @@ export default function Landing() {
             © {new Date().getFullYear()} Rapple Media. All rights reserved.
           </div>
 
-          <div className="flex items-center gap-8 text-sm font-semibold">
-            <Link to="/dashboard" className="text-slate-600 hover:text-indigo-600 transition-colors">
-              Dashboard
-            </Link>
-            <Link to="/login" className="text-slate-600 hover:text-indigo-600 transition-colors">
-              Login
-            </Link>
-            <a href="#" className="text-slate-600 hover:text-indigo-600 transition-colors">
-              Terms
-            </a>
+          <div className="flex items-center gap-8">
+            <TermsDialog />
           </div>
         </div>
       </footer>
