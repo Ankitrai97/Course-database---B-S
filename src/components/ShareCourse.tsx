@@ -8,7 +8,8 @@ import { Share2, Copy, MessageCircle, Mail, Share } from "lucide-react";
 import { showSuccess, showError } from "@/utils/toast";
 
 export default function ShareCourse() {
-  const shareUrl = window.location.origin;
+  // Using the production domain for sharing
+  const shareUrl = "https://course.rapplemedia.in";
   const shareTitle = "Join me on Build & Sell with AI!";
   const shareText = "I'm learning how to build AI products. Join me and start your journey too!";
 
