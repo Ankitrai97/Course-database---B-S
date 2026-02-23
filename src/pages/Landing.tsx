@@ -88,7 +88,7 @@ export default function Landing() {
                 { icon: <Rocket className="h-4 w-4" />, text: "Step-by-step AI product blueprint" },
                 { icon: <Zap className="h-4 w-4" />, text: "Master No-Code & Low-Code tools" },
                 { icon: <Target className="h-4 w-4" />, text: "Proven monetization strategies" },
-                { icon: <Globe className="h-4 w-4" />, text: "Launch your first AI Service" },
+                { icon: <Globe className="h-4 w-4" />, text: "Launch your first AI SaaS" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -139,7 +139,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 font-medium">
-                  Trusted by creators worldwide
+                  Trusted by Builders worldwide
                 </div>
               </div>
             </div>
