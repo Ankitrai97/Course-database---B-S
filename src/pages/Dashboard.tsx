@@ -95,7 +95,7 @@ export default function Dashboard() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <div className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-blink" />
                     <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Live now</span>
                   </div>
                 </div>
