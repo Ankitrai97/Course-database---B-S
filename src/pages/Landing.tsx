@@ -63,7 +63,7 @@ export default function Landing() {
 
             <h1 className="text-5xl sm:text-6xl font-black tracking-tight leading-[1.05] text-slate-900 dark:text-white">
               Build & Sell Your 
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">AI Service in Weeks.</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">AI Service in Weeks</span>
             </h1>
 
             <p className="text-xl text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
